@@ -1,24 +1,57 @@
 package de.nplusc.cc86.newtest;
 
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.logging.Logger;
 
 
 public class MainActivity extends Activity implements View.OnClickListener{
 TextView hw;
-
+MapView mv;
+GoogleMap  mmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        hw=(TextView) findViewById(R.id.textView);
+        setupmap();
+        //hw=(TextView) findViewById(R.id.textView);
+       // mv=MapView
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setupmap();
+    }
+
+    private void setupmap()
+    {
+
+        if(mmap==null)
+        {
+            FragmentManager f = getFragmentManager();
+            MapFragment frg = (MapFragment) f.findFragmentById(R.id.mmap);
+            Log.d("ALZR",frg + "");
+            mmap = frg .getMap();
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -43,11 +76,11 @@ TextView hw;
     public void onClick(View v) {
         if(v.getId()==R.id.button)
         {
-            hw.setText("Test von button A");
+            mmap.addMarker(new MarkerOptions().position(new LatLng(0.0,0.0)).title("Test"));
         }
         else
         {
-            hw.setText("Test von button B");
+            //mmap.
         }
     }
 }
