@@ -18,6 +18,11 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.geojson.Feature;
+import org.geojson.FeatureCollection;
+import org.geojson.LngLatAlt;
+import org.geojson.MultiPoint;
+
 import java.util.logging.Logger;
 
 
@@ -76,11 +81,29 @@ GoogleMap  mmap;
     public void onClick(View v) {
         if(v.getId()==R.id.button)
         {
-            mmap.addMarker(new MarkerOptions().position(new LatLng(0.0,0.0)).title("Test"));
+            addTrees();
         }
         else
         {
             //mmap.
         }
+    }
+
+    public void addTrees() {
+        FeatureCollection fc = CastaneaReader.with(this).read();
+
+        int maxCounter = 0;
+        for (Feature feature : fc) {
+            MultiPoint point = (MultiPoint)feature.getGeometry();
+            LngLatAlt position = point.getCoordinates().get(0);
+
+            mmap.addMarker(new MarkerOptions().position(new LatLng(position.getLatitude(), position.getLongitude())).title("Marker"));
+
+            if (maxCounter++ > 20) {
+                break;
+            }
+
+        }
+
     }
 }
