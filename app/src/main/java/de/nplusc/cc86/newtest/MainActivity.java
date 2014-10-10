@@ -96,8 +96,14 @@ GoogleMap  mmap;
         for (Feature feature : fc) {
             MultiPoint point = (MultiPoint)feature.getGeometry();
             LngLatAlt position = point.getCoordinates().get(0);
-
-            mmap.addMarker(new MarkerOptions().position(new LatLng(position.getLatitude(), position.getLongitude())).title("Marker"));
+            String kastaniensorte = feature.getProperty("BAUMART");
+            String kronendurchmesser=feature.getProperty("KRONE_DM"+"");
+            String pflanzjahr=feature.getProperty("PFLANZJAHR")+"";
+            String stammumfang=feature.getProperty("STAMMUMFAN")+"";
+            String additionalInfo = "Kronendurchmesser: "+kronendurchmesser+"\r\n"+
+                    "Stammumfang: "+stammumfang+"\r\n"+
+                    "Pflanzjahr: "+pflanzjahr;
+            mmap.addMarker(new MarkerOptions().position(new LatLng(position.getLatitude(), position.getLongitude())).title(kastaniensorte).snippet(additionalInfo));
 
             if (maxCounter++ > 20) {
                 break;
