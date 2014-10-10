@@ -18,16 +18,11 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import org.apache.http.client.HttpClient;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.geojson.Feature;
+import org.geojson.FeatureCollection;
+import org.geojson.LngLatAlt;
+import org.geojson.MultiPoint;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.util.logging.Logger;
 
 
@@ -86,42 +81,29 @@ GoogleMap  mmap;
     public void onClick(View v) {
         if(v.getId()==R.id.button)
         {
-            mmap.addMarker(new MarkerOptions().position(new LatLng(0.0,0.0)).title("Test"));
+            addTrees();
         }
         else
         {
-            InputStream raw = getResources().openRawResource(R.raw.kastanien);
 
-            BufferedReader reader = null;
-            try {
-                reader = new BufferedReader(new InputStreamReader(raw, "UTF-8"), 8);
-                StringBuilder sb = new StringBuilder();
+        }
+    }
 
-                String line = null;
-                while ((line = reader.readLine()) != null)
-                {
-                    sb.append(line + "\n");
-                }
-                String result = sb.toString();
-                try {
-                    JSONObject baeume = new JSONObject(result);
-                    //{"type":"Feature","properties":{"BAUM_ID":100060470,"BOTANISCHE":"Aesculus carnea 'Briotii'","BAUMART":"Rotblühende Rosskastanie","PFLANZJAHR":2003,
-                    // "KRONE_DM":"2 m","STAMMUMFAN":"25 cm","STANDORT":"Paulinenplatz 9"},"geometry":{"type":"MultiPoint","coordinates":[[9.963283171551076,53.55416115124533]]}}
-                    JSONArray baumliste = baeume.getJSONArray("features");
-                    for (int i = baumliste.length(); i <baumliste.length() ; i++) {
-                        JSONObject baum = baumliste.getJSONObject(i);
-                        JSONObject positionwrapped = baum.getJSONObject("geometry");
+    public void addTrees() {
+        FeatureCollection fc = CastaneaReader.with(this).read();
 
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+        int maxCounter = 0;
+        for (Feature feature : fc) {
+            MultiPoint point = (MultiPoint)feature.getGeometry();
+            LngLatAlt position = point.getCoordinates().get(0);
+
+            mmap.addMarker(new MarkerOptions().position(new LatLng(position.getLatitude(), position.getLongitude())).title("Marker"));
+
+            if (maxCounter++ > 20) {
+                break;
             }
 
         }
+
     }
 }
