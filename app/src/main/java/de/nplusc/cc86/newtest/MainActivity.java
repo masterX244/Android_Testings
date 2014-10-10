@@ -19,6 +19,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.apache.http.client.HttpClient;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -104,6 +105,14 @@ GoogleMap  mmap;
                 String result = sb.toString();
                 try {
                     JSONObject baeume = new JSONObject(result);
+                    //{"type":"Feature","properties":{"BAUM_ID":100060470,"BOTANISCHE":"Aesculus carnea 'Briotii'","BAUMART":"Rotblühende Rosskastanie","PFLANZJAHR":2003,
+                    // "KRONE_DM":"2 m","STAMMUMFAN":"25 cm","STANDORT":"Paulinenplatz 9"},"geometry":{"type":"MultiPoint","coordinates":[[9.963283171551076,53.55416115124533]]}}
+                    JSONArray baumliste = baeume.getJSONArray("features");
+                    for (int i = baumliste.length(); i <baumliste.length() ; i++) {
+                        JSONObject baum = baumliste.getJSONObject(i);
+                        JSONObject positionwrapped = baum.getJSONObject("geometry");
+
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
