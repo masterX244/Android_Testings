@@ -5,6 +5,7 @@ import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,6 +17,7 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.geojson.Feature;
@@ -93,6 +95,7 @@ GoogleMap  mmap;
         FeatureCollection fc = CastaneaReader.with(this).read();
 
         int maxCounter = 0;
+        mmap.setInfoWindowAdapter(new TreePopup());
         for (Feature feature : fc) {
             MultiPoint point = (MultiPoint)feature.getGeometry();
             LngLatAlt position = point.getCoordinates().get(0);
@@ -100,8 +103,8 @@ GoogleMap  mmap;
             String kronendurchmesser=feature.getProperty("KRONE_DM"+"");
             String pflanzjahr=feature.getProperty("PFLANZJAHR")+"";
             String stammumfang=feature.getProperty("STAMMUMFAN")+"";
-            String additionalInfo = "Kronendurchmesser: "+kronendurchmesser+"\r\n"+
-                    "Stammumfang: "+stammumfang+"\r\n"+
+            String additionalInfo = "Kronendurchmesser: "+kronendurchmesser+"\n"+
+                    "Stammumfang: "+stammumfang+"\n"+
                     "Pflanzjahr: "+pflanzjahr;
             mmap.addMarker(new MarkerOptions().position(new LatLng(position.getLatitude(), position.getLongitude())).title(kastaniensorte).snippet(additionalInfo));
 
@@ -112,4 +115,30 @@ GoogleMap  mmap;
         }
 
     }
+
+
+
+
+    public class TreePopup implements GoogleMap.InfoWindowAdapter {
+
+
+        @Override
+        public View getInfoWindow(Marker marker) {
+            return null;
+        }
+
+        @Override
+        public View getInfoContents(Marker marker) {
+            View v  = getLayoutInflater().inflate(R.layout.treeinfolayout, null);
+            String[] lines = marker.getSnippet().split("\n");
+           TextView l1 = (TextView) v.findViewById(R.id.treeTopSize);
+            TextView l2 = (TextView) v.findViewById(R.id.treeTrunkSize);
+            TextView l3 = (TextView) v.findViewById(R.id.treePlantYear);
+            l1.setText(lines[0]);
+            l2.setText(lines[1]);
+            l3.setText(lines[2]);
+            return v;
+        }
+    }
+
 }
