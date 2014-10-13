@@ -95,9 +95,10 @@ public class MainActivity extends Activity implements View.OnClickListener
     public void addTrees() {
 
         metadata=new HashMap<LatLng, TreeMeta>();
-        FeatureCollection fc = CastaneaReader.with(this).read(R.raw.kastanien);
-
         int maxCounter = 0;
+        /*FeatureCollection fc = CastaneaReader.with(this).read(R.raw.kastanien);
+
+
         mmap.setInfoWindowAdapter(new TreePopup());
         for (Feature feature : fc) {
             MultiPoint point = (MultiPoint)feature.getGeometry();
@@ -109,6 +110,7 @@ public class MainActivity extends Activity implements View.OnClickListener
            /* String additionalInfo = "Kronendurchmesser: "+kronendurchmesser+"\n"+
                     "Stammumfang: "+stammumfang+"\n"+
                     "Pflanzjahr: "+pflanzjahr;*/
+        /*
             TreeMeta tm = new TreeMeta(pflanzjahr,kronendurchmesser,stammumfang);
             LatLng metapos = new LatLng(position.getLatitude(), position.getLongitude());
             metadata.put(metapos,tm);
@@ -117,12 +119,12 @@ public class MainActivity extends Activity implements View.OnClickListener
             if (maxCounter++ > 20) {
                 break;
             }
-        }
+        }*/
         int[] parseListOSM = {R.raw.castanea,R.raw.aesculus};
         for(int parsefiles:parseListOSM)
         {
             maxCounter = 0;
-            fc=CastaneaReader.with(this).read(parsefiles);
+            FeatureCollection fc=CastaneaReader.with(this).read(parsefiles);
             for (Feature feature : fc)
             {
                 Point point = (Point)feature.getGeometry();
