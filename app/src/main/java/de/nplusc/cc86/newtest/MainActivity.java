@@ -133,7 +133,7 @@ public class MainActivity extends Activity implements View.OnClickListener
                 LatLng metapos = new LatLng(position.getLatitude(), position.getLongitude());
                 metadata.put(metapos,tm);
                 mmap.addMarker(new MarkerOptions().position(metapos).title(feature.getProperty("genus")+"").snippet("  "));
-                if (maxCounter++ > 20) {
+                if (maxCounter++ > 100) {
                     break;
                 }
             }
