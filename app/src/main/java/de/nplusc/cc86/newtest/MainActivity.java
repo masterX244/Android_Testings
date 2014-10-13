@@ -2,7 +2,11 @@ package de.nplusc.cc86.newtest;
 
 import android.app.Activity;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -12,11 +16,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -31,17 +41,26 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 
 
-public class MainActivity extends Activity implements View.OnClickListener,GoogleMap.OnInfoWindowClickListener
+public class MainActivity extends Activity implements View.OnClickListener,GoogleMap.OnInfoWindowClickListener ,GooglePlayServicesClient.ConnectionCallbacks,
+        GooglePlayServicesClient.OnConnectionFailedListener
 {
+
+
     TextView hw;
     MapView mv;
     GoogleMap  mmap;
+    LocationClient mLocationClient;
     private static HashMap<LatLng,TreeMeta> metadata;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setupmap();
+        mLocationClient = new LocationClient(this, this, this);
+
+        // ((LocationManager)getSystemService(Context.LOCATION_SERVICE)).;
+
+
     }
 
     public static HashMap<LatLng,TreeMeta> getMetadata()
@@ -90,6 +109,9 @@ public class MainActivity extends Activity implements View.OnClickListener,Googl
         if(v.getId()==R.id.button)
         {
             addTrees();
+
+
+
         }
         else
         {
@@ -152,11 +174,64 @@ public class MainActivity extends Activity implements View.OnClickListener,Googl
 
     @Override
     public void onInfoWindowClick(Marker marker) {
+        if(marker.getTitle().equals("Position"))
+        {
+            return;
+        }
         Intent myIntent = new Intent(this, TreeInfo.class);
         LatLng position=marker.getPosition();
         myIntent.putExtra("treeID", new double[]{position.latitude,position.longitude}); //Optional parameters
         this.startActivity(myIntent);
     }
+
+
+
+
+
+
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+            /*
+             * If no resolution is available, display a dialog to the
+             * user with the error.
+             */
+            //TODO errormsg
+            //showErrorDialog(connectionResult.getErrorCode());
+    }
+
+
+    public void onDisconnected() {
+        // Display the connection status
+        Toast.makeText(this, "Disconnected. Please re-connect.",
+                Toast.LENGTH_SHORT).show();
+    }
+
+
+
+    public void onConnected(Bundle dataBundle) {
+        // Display the connection status
+       Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
+
+
+        Location l = mLocationClient.getLastLocation();
+        LatLng coords = new LatLng(l.getLatitude(),l.getLongitude());
+        mmap.addMarker(new MarkerOptions().position(coords).title("Position").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+        mmap.moveCamera(CameraUpdateFactory.newLatLngZoom(coords,10));
+    }
+
+    protected void onStart() {
+        super.onStart();
+        // Connect the client.
+        mLocationClient.connect();
+
+    }
+    @Override
+    protected void onStop() {
+        // Disconnecting the client invalidates it.
+        mLocationClient.disconnect();
+        super.onStop();
+    }
+
+
 
     public class TreeMeta{
         private String treePlantYear;
