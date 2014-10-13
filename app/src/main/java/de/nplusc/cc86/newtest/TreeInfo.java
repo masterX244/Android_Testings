@@ -31,7 +31,7 @@ public class TreeInfo extends Activity {
         Set<String> metaIDs = meta.keySet();
         for(String key :metaIDs)
         {
-            kvpairs.add(key+":"+meta.get(key));
+            kvpairs.add(key+": "+meta.get(key));
         }
         ListView v = (ListView) findViewById(R.id.treeDataList);
         v.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,kvpairs));
