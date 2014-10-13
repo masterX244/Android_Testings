@@ -38,8 +38,6 @@ GoogleMap  mmap;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setupmap();
-        //hw=(TextView) findViewById(R.id.textView);
-       // mv=MapView
     }
 
     @Override
@@ -111,9 +109,7 @@ GoogleMap  mmap;
             if (maxCounter++ > 20) {
                 break;
             }
-
         }
-
     }
 
 
@@ -123,20 +119,22 @@ GoogleMap  mmap;
 
 
         @Override
-        public View getInfoWindow(Marker marker) {
-            return null;
-        }
+            public View getInfoWindow(Marker marker) {
+                return null;
+            }
 
-        @Override
-        public View getInfoContents(Marker marker) {
+            @Override
+            public View getInfoContents(Marker marker) {
             View v  = getLayoutInflater().inflate(R.layout.treeinfolayout, null);
             String[] lines = marker.getSnippet().split("\n");
            TextView l1 = (TextView) v.findViewById(R.id.treeTopSize);
             TextView l2 = (TextView) v.findViewById(R.id.treeTrunkSize);
             TextView l3 = (TextView) v.findViewById(R.id.treePlantYear);
+                TextView name = (TextView) v.findViewById(R.id.baumname);
             l1.setText(lines[0]);
             l2.setText(lines[1]);
             l3.setText(lines[2]);
+            name.setText("Art: "+marker.getTitle());
             return v;
         }
     }
