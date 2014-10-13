@@ -23,9 +23,9 @@ public class CastaneaReader {
         return new CastaneaReader(context);
     }
 
-    public FeatureCollection read() {
+    public FeatureCollection read(int ressourceID) {
         ObjectMapper objectMapper = new ObjectMapper();
-        InputStream content = context.getResources().openRawResource(R.raw.kastanien);
+        InputStream content = context.getResources().openRawResource(ressourceID);
 
         try {
             FeatureCollection featureCollection = objectMapper.readValue(content, FeatureCollection.class);

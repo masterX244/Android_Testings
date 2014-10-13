@@ -24,15 +24,18 @@ import org.geojson.Feature;
 import org.geojson.FeatureCollection;
 import org.geojson.LngLatAlt;
 import org.geojson.MultiPoint;
+import org.geojson.Point;
 
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 
-public class MainActivity extends Activity implements View.OnClickListener{
-TextView hw;
-MapView mv;
-GoogleMap  mmap;
-
+public class MainActivity extends Activity implements View.OnClickListener
+{
+    TextView hw;
+    MapView mv;
+    GoogleMap  mmap;
+    private HashMap<LatLng,TreeMeta> metadata;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,7 +93,9 @@ GoogleMap  mmap;
     }
 
     public void addTrees() {
-        FeatureCollection fc = CastaneaReader.with(this).read();
+
+        metadata=new HashMap<LatLng, TreeMeta>();
+        FeatureCollection fc = CastaneaReader.with(this).read(R.raw.kastanien);
 
         int maxCounter = 0;
         mmap.setInfoWindowAdapter(new TreePopup());
@@ -101,19 +106,64 @@ GoogleMap  mmap;
             String kronendurchmesser=feature.getProperty("KRONE_DM"+"");
             String pflanzjahr=feature.getProperty("PFLANZJAHR")+"";
             String stammumfang=feature.getProperty("STAMMUMFAN")+"";
-            String additionalInfo = "Kronendurchmesser: "+kronendurchmesser+"\n"+
+           /* String additionalInfo = "Kronendurchmesser: "+kronendurchmesser+"\n"+
                     "Stammumfang: "+stammumfang+"\n"+
-                    "Pflanzjahr: "+pflanzjahr;
-            mmap.addMarker(new MarkerOptions().position(new LatLng(position.getLatitude(), position.getLongitude())).title(kastaniensorte).snippet(additionalInfo));
+                    "Pflanzjahr: "+pflanzjahr;*/
+            TreeMeta tm = new TreeMeta(pflanzjahr,kronendurchmesser,stammumfang);
+            LatLng metapos = new LatLng(position.getLatitude(), position.getLongitude());
+            metadata.put(metapos,tm);
+            mmap.addMarker(new MarkerOptions().position(metapos).title(kastaniensorte).snippet("  "));
 
             if (maxCounter++ > 20) {
                 break;
             }
         }
+        int[] parseListOSM = {R.raw.castanea,R.raw.aesculus};
+        for(int parsefiles:parseListOSM)
+        {
+            maxCounter = 0;
+            fc=CastaneaReader.with(this).read(parsefiles);
+            for (Feature feature : fc)
+            {
+                Point point = (Point)feature.getGeometry();
+                LngLatAlt position = point.getCoordinates();
+
+
+                TreeMeta tm = new TreeMeta("unbekannt","unbekannt","unbekannt");
+                LatLng metapos = new LatLng(position.getLatitude(), position.getLongitude());
+                metadata.put(metapos,tm);
+                mmap.addMarker(new MarkerOptions().position(metapos).title(feature.getProperty("genus")+"").snippet("  "));
+                if (maxCounter++ > 20) {
+                    break;
+                }
+            }
+
+        }
     }
 
+    public class TreeMeta{
+        private String treePlantYear;
+        private String treeTopSize;
+        private String treeTrunkSize;
 
+        public TreeMeta(String treePlantYear, String treeTopSize, String treeTrunkSize) {
+            this.treePlantYear = treePlantYear;
+            this.treeTopSize = treeTopSize;
+            this.treeTrunkSize = treeTrunkSize;
+        }
 
+        public String getTreePlantYear() {
+            return treePlantYear;
+        }
+
+        public String getTreeTopSize() {
+            return treeTopSize;
+        }
+
+        public String getTreeTrunkSize() {
+            return treeTrunkSize;
+        }
+    }
 
     public class TreePopup implements GoogleMap.InfoWindowAdapter {
 
@@ -124,16 +174,19 @@ GoogleMap  mmap;
             }
 
             @Override
-            public View getInfoContents(Marker marker) {
+            public View getInfoContents(Marker marker)
+            {
+
             View v  = getLayoutInflater().inflate(R.layout.treeinfolayout, null);
-            String[] lines = marker.getSnippet().split("\n");
            TextView l1 = (TextView) v.findViewById(R.id.treeTopSize);
             TextView l2 = (TextView) v.findViewById(R.id.treeTrunkSize);
             TextView l3 = (TextView) v.findViewById(R.id.treePlantYear);
                 TextView name = (TextView) v.findViewById(R.id.baumname);
-            l1.setText(lines[0]);
-            l2.setText(lines[1]);
-            l3.setText(lines[2]);
+
+                TreeMeta data=metadata.get(marker.getPosition());
+            l1.setText("Kronendurchmesser: "+data.getTreeTopSize());
+            l2.setText("Stammumfang: "+data.getTreeTrunkSize());
+            l3.setText("Pflanzjahr: "+data.getTreePlantYear());
             name.setText("Art: "+marker.getTitle());
             return v;
         }
