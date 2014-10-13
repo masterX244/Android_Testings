@@ -2,6 +2,7 @@ package de.nplusc.cc86.newtest;
 
 import android.app.Activity;
 import android.app.FragmentManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -30,12 +31,12 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 
 
-public class MainActivity extends Activity implements View.OnClickListener
+public class MainActivity extends Activity implements View.OnClickListener,GoogleMap.OnInfoWindowClickListener
 {
     TextView hw;
     MapView mv;
     GoogleMap  mmap;
-    private HashMap<LatLng,TreeMeta> metadata;
+    private static HashMap<LatLng,TreeMeta> metadata;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,6 +44,10 @@ public class MainActivity extends Activity implements View.OnClickListener
         setupmap();
     }
 
+    public static HashMap<LatLng,TreeMeta> getMetadata()
+    {
+        return metadata;
+    }
     @Override
     protected void onResume() {
         super.onResume();
@@ -96,10 +101,12 @@ public class MainActivity extends Activity implements View.OnClickListener
 
         metadata=new HashMap<LatLng, TreeMeta>();
         int maxCounter = 0;
+        mmap.setInfoWindowAdapter(new TreePopup());
+        mmap.setOnInfoWindowClickListener(this);
         /*FeatureCollection fc = CastaneaReader.with(this).read(R.raw.kastanien);
 
 
-        mmap.setInfoWindowAdapter(new TreePopup());
+
         for (Feature feature : fc) {
             MultiPoint point = (MultiPoint)feature.getGeometry();
             LngLatAlt position = point.getCoordinates().get(0);
@@ -131,7 +138,7 @@ public class MainActivity extends Activity implements View.OnClickListener
                 LngLatAlt position = point.getCoordinates();
 
 
-                TreeMeta tm = new TreeMeta("unbekannt","unbekannt","unbekannt");
+                TreeMeta tm = new TreeMeta("unbekannt","unbekannt","unbekannt",feature);
                 LatLng metapos = new LatLng(position.getLatitude(), position.getLongitude());
                 metadata.put(metapos,tm);
                 mmap.addMarker(new MarkerOptions().position(metapos).title(feature.getProperty("genus")+"").snippet("  "));
@@ -143,15 +150,25 @@ public class MainActivity extends Activity implements View.OnClickListener
         }
     }
 
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        Intent myIntent = new Intent(this, TreeInfo.class);
+        LatLng position=marker.getPosition();
+        myIntent.putExtra("treeID", new double[]{position.latitude,position.longitude}); //Optional parameters
+        this.startActivity(myIntent);
+    }
+
     public class TreeMeta{
         private String treePlantYear;
         private String treeTopSize;
         private String treeTrunkSize;
+        private Feature tree;
 
-        public TreeMeta(String treePlantYear, String treeTopSize, String treeTrunkSize) {
+        public TreeMeta(String treePlantYear, String treeTopSize, String treeTrunkSize,Feature tree) {
             this.treePlantYear = treePlantYear;
             this.treeTopSize = treeTopSize;
             this.treeTrunkSize = treeTrunkSize;
+            this.tree=tree;
         }
 
         public String getTreePlantYear() {
@@ -164,6 +181,10 @@ public class MainActivity extends Activity implements View.OnClickListener
 
         public String getTreeTrunkSize() {
             return treeTrunkSize;
+        }
+        public Feature getTree()
+        {
+            return tree;
         }
     }
 
